@@ -19,8 +19,8 @@ export default function Home() {
       {(ip && (
         <main className="grid place-items-center h-screen p-0 lg:p-32">
           <div className="grid h-full w-full backdrop-blur-xl border rounded-none lg:rounded-2xl p-2 bg-black/10">
-            <div className="grid w-fit gap-2">
-              <div className="grid place-items-center p-4 bg-black/10 w-full  rounded-xl">
+            <div className="grid w-full gap-2">
+              <div className="grid place-items-center p-4 bg-black/10 w-full rounded-xl">
                 <Knob
                   value={temp}
                   onChange={(e) => setTemp(e.value)}
@@ -64,7 +64,7 @@ export default function Home() {
       )) || (
         <div className="grid place-items-center h-screen p-0 lg:p-32">
           <div className="grid h-full w-full backdrop-blur-xl border rounded-none lg:rounded-2xl p-2 bg-black/10">
-            <div className="grid w-fit gap-2 place-items-center">
+            <div className="grid w-full gap-2 place-items-center">
               <div className="p-4 bg-black/10 w-fit rounded-xl h-fit">
                 <input
                   type="text"
