@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { Knob } from "primereact/knob";
 import { ToggleButton, ToggleButtonChangeEvent } from "primereact/togglebutton";
 
+
+
 export default function Home() {
   const [valueIP, setValueIP] = useState("");
   const [ip, setIP] = useState("");
@@ -12,8 +14,8 @@ export default function Home() {
   const [fan, setFan] = useState(false);
 
   useEffect(() => {
-    console.log({ temp, timer, light, fan });
-  }, [temp, timer, light, fan]);
+    console.log({ ip, temp, timer, light, fan });
+  }, [ip, temp, timer, light, fan]);
   return (
     <>
       {(ip && (
@@ -34,7 +36,20 @@ export default function Home() {
                 <div className="py-2">
                   <ToggleButton
                     checked={timer}
-                    onChange={(e: ToggleButtonChangeEvent) => setTimer(e.value)}
+                    onChange={(e: ToggleButtonChangeEvent) => {                      
+                      fetch(`http://${ip}/timer`, {
+                        method: "POST",
+                        body: JSON.stringify({ timer: e.value }),
+                        headers: {
+                          "Content-Type": "application/json"
+                        }
+                      }).then((res) => res.json()).then((data) => {
+                        setTimer(data.timer);
+                        setFan(data.fan);
+                        setLight(data.light);
+                        setTemp(data.temp);
+                      });
+                    }}
                     offLabel="Timer off"
                     onLabel="Timer on"
                   />
@@ -44,7 +59,20 @@ export default function Home() {
                 <div className="py-2">
                   <ToggleButton
                     checked={fan}
-                    onChange={(e: ToggleButtonChangeEvent) => setFan(e.value)}
+                    onChange={(e: ToggleButtonChangeEvent) => {                      
+                      fetch(`http://${ip}/fan`, {
+                        method: "POST",
+                        body: JSON.stringify({ timer: e.value }),
+                        headers: {
+                          "Content-Type": "application/json"
+                        }
+                      }).then((res) => res.json()).then((data) => {
+                        setTimer(data.timer);
+                        setFan(data.fan);
+                        setLight(data.light);
+                        setTemp(data.temp);
+                      });
+                    }}
                     offLabel="Fan off"
                     onLabel="Fan on"
                   />
@@ -52,7 +80,20 @@ export default function Home() {
                 <div className="py-2">
                   <ToggleButton
                     checked={light}
-                    onChange={(e: ToggleButtonChangeEvent) => setLight(e.value)}
+                    onChange={(e: ToggleButtonChangeEvent) => {                      
+                      fetch(`http://${ip}/light`, {
+                        method: "POST",
+                        body: JSON.stringify({ timer: e.value }),
+                        headers: {
+                          "Content-Type": "application/json"
+                        }
+                      }).then((res) => res.json()).then((data) => {
+                        setTimer(data.timer);
+                        setFan(data.fan);
+                        setLight(data.light);
+                        setTemp(data.temp);
+                      });
+                    }}
                     offLabel="Light off"
                     onLabel="Light on"
                   />
