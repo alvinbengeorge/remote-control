@@ -27,6 +27,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"></meta>
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[url('/background.webp')] bg-cover bg-center`}
       >
