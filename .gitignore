@@ -2,3 +2,13 @@ node_modules
 .next
 .DS_Store
 *.log
+
+# SSL certificates and private keys
+certs/
+*.pem
+*.crt
+*.key
+
+# Local hardware identifiers and config
+config.json
+

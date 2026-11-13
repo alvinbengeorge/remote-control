@@ -3,34 +3,98 @@
 @tailwind utilities;
 
 :root {
-  --background: #080B11;
-  --foreground: #F8FAFC;
+  --bg-base: #080B11;
+  --bg-surface: #0E1522;
+  --bg-card: #131D2E;
+  --bg-pill: #172338;
+  --bg-hover: #223352;
+  --border-dim: #1C2B42;
+  --border-active: #2962FF;
+  --border-glow: rgba(41, 98, 255, 0.25);
+  --accent-primary: #2962FF;
+  --accent-sky: #38BDF8;
+  --accent-cyan: #00F0FF;
+  --accent-violet: #60B01C;
+  --accent-emerald: #60B01C;
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #8295AD;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: var(--text-primary);
+  background: var(--bg-base);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   overflow: hidden;
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
   touch-action: none;
+  transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Prevent iOS rubber-banding and pull-to-refresh */
 html, body {
   position: fixed;
   width: 100%;
-  height: 100%;
+  height: 100dvh;
+  min-height: 100dvh;
+  max-height: 100dvh;
   overscroll-behavior: none;
 }
 
+/* Hide scrollbars completely for sleek mobile look */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* Morphing theme card & buttons */
+.theme-card {
+  background-color: var(--bg-surface);
+  border-color: var(--border-dim);
+  transition: background-color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+.theme-pill {
+  background-color: var(--bg-card);
+  border-color: var(--border-dim);
+  transition: background-color 0.5s ease, border-color 0.5s ease;
+}
+
 .key-btn {
-  @apply bg-[#131D2E] active:bg-[#2962FF] border border-[#1C2B42] active:border-[#2962FF] rounded-xl text-white font-medium flex items-center justify-center text-sm shadow-sm active:scale-95 transition-all select-none;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  color: var(--text-primary);
+  @apply rounded-xl font-medium flex items-center justify-center text-sm shadow-sm active:scale-95 select-none;
+  transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.1s ease;
   min-height: 48px;
+}
+.key-btn:active {
+  background-color: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: #FFFFFF;
 }
 
 .action-btn {
-  @apply bg-[#131D2E] active:bg-[#2962FF] border border-[#1C2B42] active:border-[#2962FF] rounded-xl text-white font-medium flex items-center justify-center text-xs py-2.5 px-2 active:scale-95 transition-all select-none;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  color: var(--text-primary);
+  @apply rounded-xl font-medium flex items-center justify-center text-xs py-2.5 px-2 active:scale-95 select-none;
+  transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.1s ease;
+}
+.action-btn:active {
+  background-color: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: #FFFFFF;
 }

@@ -1,6 +1,7 @@
 {
-  "port": 3456,
+  "port": 3457,
   "allowedMac": "",
+  "allowedMacs": [],
   "pairingMode": true,
   "sensitivity": 1.2,
   "scrollSensitivity": 1.0,

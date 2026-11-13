@@ -10,6 +10,7 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "AG Remote",
   },
+  applicationName: "Antigravity Remote",
 };
 
 export const viewport: Viewport = {

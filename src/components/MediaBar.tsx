@@ -1,15 +1,38 @@
 'use client';
 
 import React from 'react';
-import { Volume2, Volume1, VolumeX, Sun, SunMedium, Play, SkipForward, SkipBack, Maximize, Layers, Terminal, Globe, Code, Folder, MessageCircle, Sliders } from 'lucide-react';
+import {
+  Volume2,
+  VolumeX,
+  Play,
+  Pause,
+  SkipForward,
+  SkipBack,
+  Palette,
+  Music,
+  RefreshCw,
+} from 'lucide-react';
 
 interface MediaBarProps {
   sendWs: (msg: any) => void;
   connected: boolean;
+  theme?: any;
+  allThemes?: any[];
+  media?: any;
+  volume?: { volume: number; muted: boolean };
+  onOpenThemeStudio?: () => void;
 }
 
-export default function MediaBar({ sendWs, connected }: MediaBarProps) {
-  const vibrate = (p = 15) => {
+export default function MediaBar({
+  sendWs,
+  connected,
+  theme,
+  allThemes = [],
+  media,
+  volume = { volume: 50, muted: false },
+  onOpenThemeStudio,
+}: MediaBarProps) {
+  const vibrate = (p: number | number[] = 15) => {
     if (typeof window !== 'undefined' && 'vibrate' in navigator) {
       try { navigator.vibrate(p); } catch (e) {}
     }
@@ -20,123 +43,195 @@ export default function MediaBar({ sendWs, connected }: MediaBarProps) {
     vibrate(15);
   };
 
+  const isPlaying = media?.status === 'Playing';
+
   return (
-    <div className="flex flex-col flex-1 w-full gap-4 overflow-y-auto pb-4 select-none">
-      {/* 1. Hyprland Workspace Matrix */}
-      <div className="bg-[#0E1522] border border-[#1C2B42] rounded-2xl p-3">
-        <span className="text-[11px] font-mono text-slate-400 mb-2 block uppercase tracking-wider">
-          Hyprland Workspaces
-        </span>
-        <div className="grid grid-cols-6 gap-2">
-          {[1, 2, 3, 4, 5, 6].map((ws) => (
-            <button
-              key={ws}
-              onClick={() => act('hypr', 'workspace', ws)}
-              disabled={!connected}
-              className="h-11 rounded-xl bg-[#131D2E] border border-[#1C2B42] active:border-[#2962FF] active:bg-[#2962FF]/20 text-white font-mono font-bold text-sm flex items-center justify-center active:scale-95 transition-all"
-            >
-              {ws}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* 2. Volume & Brightness Sliders / Buttons */}
-      <div className="bg-[#0E1522] border border-[#1C2B42] rounded-2xl p-3 flex flex-col gap-3">
-        <span className="text-[11px] font-mono text-slate-400 block uppercase tracking-wider">
-          Volume & Audio
-        </span>
-        <div className="grid grid-cols-3 gap-2">
-          <button onClick={() => act('volume', 'down')} className="action-btn">
-            <Volume1 className="w-4 h-4 mr-1 text-[#38BDF8]" /> Vol -
-          </button>
-          <button onClick={() => act('volume', 'mute')} className="action-btn">
-            <VolumeX className="w-4 h-4 mr-1 text-rose-400" /> Mute
-          </button>
-          <button onClick={() => act('volume', 'up')} className="action-btn">
-            <Volume2 className="w-4 h-4 mr-1 text-[#38BDF8]" /> Vol +
-          </button>
+    <div className="flex flex-col flex-1 w-full gap-2.5 overflow-y-auto no-scrollbar pt-1.5 px-0.5 pb-6 select-none">
+      {/* ── 1. WORKSTATION AUDIO // MPRIS & MASTER VOLUME ────────────────── */}
+      <div
+        className="rounded-2xl p-3 border theme-card flex flex-col gap-3 shrink-0 relative overflow-hidden shadow-sm transition-all duration-300"
+        style={{
+          borderColor: isPlaying ? 'var(--border-active)' : 'var(--border-dim)',
+          boxShadow: isPlaying ? '0 0 16px var(--border-glow)' : 'none',
+        }}
+      >
+        {/* Card Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-slate-400">
+            <Music className={`w-3.5 h-3.5 ${isPlaying ? 'text-[#00F0FF] animate-pulse' : 'text-slate-500'}`} />
+            <span>Workstation Audio // MPRIS</span>
+          </div>
+          <span
+            className={`text-[9px] font-mono px-2 py-0.5 rounded-full border ${
+              isPlaying
+                ? 'bg-emerald-950/40 border-emerald-500 text-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.3)]'
+                : media?.status === 'Paused'
+                ? 'bg-amber-950/40 border-amber-500 text-amber-400'
+                : 'bg-slate-900 border-slate-700 text-slate-400'
+            }`}
+          >
+            {media?.status || 'Idle'}
+          </span>
         </div>
 
-        <span className="text-[11px] font-mono text-slate-400 block uppercase tracking-wider mt-1">
-          Media Playback & Backlight
-        </span>
+        {/* Track Metadata */}
+        <div className="flex items-center gap-3">
+          <div
+            className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border relative overflow-hidden"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              borderColor: isPlaying ? 'var(--border-active)' : 'var(--border-dim)',
+            }}
+          >
+            <Music className="w-5 h-5" style={{ color: 'var(--accent-sky)' }} />
+            {isPlaying && (
+              <span className="absolute bottom-1 right-1 w-2 h-2 rounded-full bg-emerald-400 animate-ping opacity-75" />
+            )}
+          </div>
+          <div className="flex flex-col min-w-0 flex-1">
+            <span className="text-xs font-bold text-white truncate leading-tight">
+              {media?.title || 'No Active Media'}
+            </span>
+            <span className="text-[10px] text-slate-400 truncate mt-0.5">
+              {media?.artist || 'Workstation Audio Sink'}
+            </span>
+          </div>
+        </div>
+
+        {/* Playback Controls */}
         <div className="grid grid-cols-3 gap-2">
-          <button onClick={() => act('media', 'prev')} className="action-btn">
+          <button
+            onClick={() => act('media', 'prev')}
+            disabled={!connected}
+            className="action-btn"
+          >
             <SkipBack className="w-4 h-4 mr-1" /> Prev
           </button>
-          <button onClick={() => act('media', 'play-pause')} className="action-btn bg-[#60B01C]/20 border-[#60B01C]/40 text-[#60B01C]">
-            <Play className="w-4 h-4 mr-1" /> Play
+          <button
+            onClick={() => act('media', 'play-pause')}
+            disabled={!connected}
+            className={`action-btn font-bold transition-all ${
+              isPlaying
+                ? 'bg-emerald-600/30 border-emerald-500 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.3)]'
+                : 'bg-[#2962FF]/20 border-[#2962FF] text-white'
+            }`}
+          >
+            {isPlaying ? (
+              <>
+                <Pause className="w-4 h-4 mr-1 fill-current" /> Pause
+              </>
+            ) : (
+              <>
+                <Play className="w-4 h-4 mr-1 fill-current" /> Play
+              </>
+            )}
           </button>
-          <button onClick={() => act('media', 'next')} className="action-btn">
+          <button
+            onClick={() => act('media', 'next')}
+            disabled={!connected}
+            className="action-btn"
+          >
             <SkipForward className="w-4 h-4 mr-1" /> Next
           </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 mt-1">
-          <button onClick={() => act('brightness', 'down')} className="action-btn">
-            <SunMedium className="w-4 h-4 mr-1 text-amber-400" /> Bright -
+        {/* Integrated Master Volume Control */}
+        <div
+          className="rounded-xl p-2 border flex items-center justify-between gap-2 mt-0.5"
+          style={{
+            backgroundColor: 'var(--bg-card)',
+            borderColor: 'var(--border-dim)',
+          }}
+        >
+          <button
+            onClick={() => act('volume', 'mute')}
+            disabled={!connected}
+            className={`px-2.5 py-1.5 rounded-lg border text-xs font-medium flex items-center gap-1 active:scale-95 transition-all ${
+              volume.muted
+                ? 'bg-rose-950/50 border-rose-500 text-rose-400 shadow-[0_0_8px_rgba(244,63,94,0.3)]'
+                : 'border-transparent text-slate-300 active:bg-slate-800'
+            }`}
+            title="Toggle Mute"
+          >
+            {volume.muted ? (
+              <>
+                <VolumeX className="w-3.5 h-3.5 text-rose-400" />
+                <span className="text-[10px] font-mono uppercase">Muted</span>
+              </>
+            ) : (
+              <>
+                <Volume2 className="w-3.5 h-3.5" style={{ color: 'var(--accent-sky)' }} />
+                <span className="text-[10px] font-mono">{volume.volume}%</span>
+              </>
+            )}
           </button>
-          <button onClick={() => act('brightness', 'up')} className="action-btn">
-            <Sun className="w-4 h-4 mr-1 text-amber-400" /> Bright +
-          </button>
+
+          {/* Quick Volume Steppers */}
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => act('volume', 'down')}
+              disabled={!connected}
+              className="px-2.5 py-1.5 rounded-lg border text-xs font-mono text-slate-300 active:scale-95 transition-all"
+              style={{
+                backgroundColor: 'var(--bg-surface)',
+                borderColor: 'var(--border-dim)',
+              }}
+              title="Volume Down 5%"
+            >
+              - 5%
+            </button>
+            <button
+              onClick={() => act('volume', 'up')}
+              disabled={!connected}
+              className="px-2.5 py-1.5 rounded-lg border text-xs font-mono text-white active:scale-95 transition-all"
+              style={{
+                backgroundColor: 'var(--bg-surface)',
+                borderColor: 'var(--border-dim)',
+              }}
+              title="Volume Up 5%"
+            >
+              + 5%
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* 3. Window & Quickshell Actions */}
-      <div className="bg-[#0E1522] border border-[#1C2B42] rounded-2xl p-3 flex flex-col gap-2">
-        <span className="text-[11px] font-mono text-slate-400 block uppercase tracking-wider">
-          Window & Shell Controls
-        </span>
-        <div className="grid grid-cols-3 gap-2">
-          <button onClick={() => act('hypr', 'fullscreen')} className="action-btn">
-            <Maximize className="w-4 h-4 mr-1 text-purple-400" /> Fullscreen
-          </button>
-          <button onClick={() => act('hypr', 'floating')} className="action-btn">
-            <Layers className="w-4 h-4 mr-1 text-cyan-400" /> Float
-          </button>
-          <button onClick={() => act('hypr', 'kill')} className="action-btn text-rose-400 border-rose-900/40">
-            Kill Win
-          </button>
+      {/* ── 2. WORKSTATION THEME SYNC & STUDIO ───────────────────────────── */}
+      <div className="rounded-2xl p-3 border theme-card flex flex-col gap-2.5 shrink-0 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-slate-400">
+            <Palette className="w-3.5 h-3.5 text-[#A78BFA]" />
+            <span>Desktop Theme Studio</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span
+              className="w-2.5 h-2.5 rounded-full shadow"
+              style={{ backgroundColor: theme?.borderActive || '#2962FF' }}
+            />
+            <span className="text-[10px] font-mono text-white font-semibold">
+              {theme?.name || 'Active Theme'}
+            </span>
+          </div>
         </div>
 
-        <span className="text-[11px] font-mono text-slate-400 block uppercase tracking-wider mt-2">
-          Quickshell Overlays
-        </span>
-        <div className="grid grid-cols-3 gap-2">
-          <button onClick={() => act('quickshell', 'antigravity')} className="action-btn text-[#00F0FF] border-[#00F0FF]/30">
-            ✦ HUD
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => onOpenThemeStudio && onOpenThemeStudio()}
+            className="action-btn bg-[#2962FF]/20 border-[#2962FF] text-white font-medium flex items-center justify-center gap-1.5 py-2.5"
+          >
+            <Palette className="w-3.5 h-3.5 text-[#38BDF8]" />
+            <span>Switch Theme ({allThemes.length || 15})</span>
           </button>
-          <button onClick={() => act('quickshell', 'whatsapp')} className="action-btn text-[#25D366] border-[#25D366]/30">
-            <MessageCircle className="w-4 h-4 mr-1" /> WA
-          </button>
-          <button onClick={() => act('quickshell', 'control')} className="action-btn">
-            <Sliders className="w-4 h-4 mr-1" /> Controls
-          </button>
-        </div>
-      </div>
 
-      {/* 4. App Launchers */}
-      <div className="bg-[#0E1522] border border-[#1C2B42] rounded-2xl p-3">
-        <span className="text-[11px] font-mono text-slate-400 mb-2 block uppercase tracking-wider">
-          Quick App Launch
-        </span>
-        <div className="grid grid-cols-4 gap-2">
-          <button onClick={() => act('hypr', 'launch', 'kitty')} className="action-btn flex-col py-3">
-            <Terminal className="w-5 h-5 mb-1 text-sky-400" />
-            <span className="text-[10px]">Kitty</span>
-          </button>
-          <button onClick={() => act('hypr', 'launch', 'google-chrome')} className="action-btn flex-col py-3">
-            <Globe className="w-5 h-5 mb-1 text-amber-400" />
-            <span className="text-[10px]">Chrome</span>
-          </button>
-          <button onClick={() => act('hypr', 'launch', 'code')} className="action-btn flex-col py-3">
-            <Code className="w-5 h-5 mb-1 text-blue-400" />
-            <span className="text-[10px]">VS Code</span>
-          </button>
-          <button onClick={() => act('hypr', 'launch', 'nautilus')} className="action-btn flex-col py-3">
-            <Folder className="w-5 h-5 mb-1 text-emerald-400" />
-            <span className="text-[10px]">Files</span>
+          <button
+            onClick={() => {
+              sendWs({ type: 'cycle_theme' });
+              vibrate(20);
+            }}
+            className="action-btn border-[#1C2B42] text-slate-300 flex items-center justify-center gap-1.5 py-2.5"
+          >
+            <RefreshCw className="w-3.5 h-3.5 text-amber-400" />
+            <span>5m Auto-Cycle</span>
           </button>
         </div>
       </div>

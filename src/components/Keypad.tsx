@@ -1,14 +1,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Send, CornerDownLeft, Delete, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, KeyRound, Eye, EyeOff, Lock, Unlock } from 'lucide-react';
+import { Send, CornerDownLeft, Delete, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, KeyRound, Eye, EyeOff, Lock, Unlock, Clipboard, Sparkles, Fingerprint } from 'lucide-react';
 
 interface KeypadProps {
   sendWs: (msg: any) => void;
   connected: boolean;
+  onOpenClipboard?: () => void;
+  onOpenBiometric?: () => void;
 }
 
-export default function Keypad({ sendWs, connected }: KeypadProps) {
+export default function Keypad({ sendWs, connected, onOpenClipboard, onOpenBiometric }: KeypadProps) {
   const [text, setText] = useState('');
   const [unlockPassword, setUnlockPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -79,7 +81,7 @@ export default function Keypad({ sendWs, connected }: KeypadProps) {
         </button>
       </form>
 
-      {/* Unlock Hyprlock Quick Action */}
+      {/* Quick Actions: Unlock PC & Magic Clipboard */}
       <div className="bg-[#0E1522] border border-[#1C2B42] rounded-xl p-2.5 shrink-0 flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <button
@@ -88,19 +90,44 @@ export default function Keypad({ sendWs, connected }: KeypadProps) {
             className="flex items-center gap-1.5 text-xs font-mono text-[#38BDF8]"
           >
             <KeyRound className="w-3.5 h-3.5" />
-            <span>{showUnlockBox ? 'Hide Hyprlock Unlock' : 'Unlock PC / Password'}</span>
+            <span>{showUnlockBox ? 'Hide Unlock' : 'Unlock PC'}</span>
           </button>
 
-          {unlockPassword && (
-            <button
-              onClick={handleUnlockPC}
-              disabled={!connected}
-              className="flex items-center gap-1 text-[11px] font-mono px-3 py-1 bg-[#60B01C]/20 border border-[#60B01C]/50 text-[#60B01C] rounded-lg active:scale-95"
-            >
-              <Unlock className="w-3 h-3" />
-              <span>Unlock Now</span>
-            </button>
-          )}
+          <div className="flex items-center gap-1.5">
+            {onOpenBiometric && (
+              <button
+                type="button"
+                onClick={onOpenBiometric}
+                className="flex items-center gap-1 text-[11px] font-mono px-2.5 py-1 bg-cyan-950/40 border border-cyan-500/40 text-cyan-400 rounded-lg active:scale-95 transition-all shadow-sm"
+                title="Unlock PC with Fingerprint / Biometrics"
+              >
+                <Fingerprint className="w-3 h-3" />
+                <span>Biometric</span>
+              </button>
+            )}
+
+            {onOpenClipboard && (
+              <button
+                type="button"
+                onClick={onOpenClipboard}
+                className="flex items-center gap-1 text-[11px] font-mono px-2.5 py-1 bg-emerald-950/40 border border-emerald-500/40 text-emerald-400 rounded-lg active:scale-95 transition-all"
+              >
+                <Clipboard className="w-3 h-3" />
+                <span>Magic Clip</span>
+              </button>
+            )}
+
+            {unlockPassword && (
+              <button
+                onClick={handleUnlockPC}
+                disabled={!connected}
+                className="flex items-center gap-1 text-[11px] font-mono px-2.5 py-1 bg-[#60B01C]/20 border border-[#60B01C]/50 text-[#60B01C] rounded-lg active:scale-95"
+              >
+                <Unlock className="w-3 h-3" />
+                <span>Unlock</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {showUnlockBox && (
